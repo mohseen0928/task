@@ -1,0 +1,46 @@
+from PIL import Image
+import tkinter as tk
+from tkinter import filedialog, simpledialog
+import os
+
+def encrypt_decrypt_image(filepath, key, output_path):
+    img = Image.open(filepath)
+    img = img.convert('RGB')
+    pixels = img.load()
+
+    width, height = img.size
+
+    for i in range(width):
+        for j in range(height):
+            r, g, b = pixels[i, j]
+            pixels[i, j] = (r ^ key, g ^ key, b ^ key)
+
+    img.save(output_path)
+    print(f"Saved to {output_path}")
+
+def main():
+    root = tk.Tk()
+    root.withdraw()  # Hide main window
+
+    filepath = filedialog.askopenfilename(title="Select Image")
+    if not filepath:
+        print("No file selected.")
+        return
+
+    key = simpledialog.askinteger("Encryption Key", "Enter an integer key (0-255):", minvalue=0, maxvalue=255)
+    if key is None:
+        print("No key entered.")
+        return
+
+    choice = simpledialog.askstring("Choice", "Encrypt or Decrypt? (e/d)").lower()
+    if choice not in ['e', 'd']:
+        print("Invalid choice.")
+        return
+
+    output_name = f"{'encrypted' if choice == 'e' else 'decrypted'}_" + os.path.basename(filepath)
+    output_path = os.path.join(os.path.dirname(filepath), output_name)
+
+    encrypt_decrypt_image(filepath, key, output_path)
+
+if __name__ == "__main__":
+    main()
